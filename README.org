@@ -1,0 +1,3 @@
+* soup
+
+scraping utilities - very much work in progress

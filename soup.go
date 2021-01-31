@@ -12,7 +12,7 @@ import (
 
 func Parse(r io.Reader) (*Node, error) {
 	htmlNode, err := html.Parse(r)
-	return asNode(htmlNode), err
+	return AsNode(htmlNode), err
 }
 
 func MustParse(r io.Reader) *Node {
@@ -45,7 +45,7 @@ func (n *Node) FirstSel(s css.Selector) *Node {
 	if n == nil {
 		return nil
 	}
-	return asNode(css.First(s, asHTMLNode(n)))
+	return AsNode(css.First(s, AsHTMLNode(n)))
 }
 
 func (n *Node) All(s string) Nodes { return n.AllSel(css.MustCompile(s)) }
@@ -53,13 +53,13 @@ func (n *Node) AllSel(s css.Selector) Nodes {
 	if n == nil {
 		return nil
 	}
-	htmlNodes := css.All(s, asHTMLNode(n))
-	return asNodes(&htmlNodes)
+	htmlNodes := css.All(s, AsHTMLNode(n))
+	return AsNodes(&htmlNodes)
 }
 
 func (n *Node) Text() string {
 	var out strings.Builder
-	appendText(&out, asHTMLNode(n))
+	appendText(&out, AsHTMLNode(n))
 	return out.String()
 }
 
@@ -72,7 +72,7 @@ func (n *Node) OuterHTML() string {
 		return ""
 	}
 	var out strings.Builder
-	if err := html.Render(&out, asHTMLNode(n)); err != nil {
+	if err := html.Render(&out, AsHTMLNode(n)); err != nil {
 		panic(fmt.Sprintf("Could not render html: %s", err))
 	}
 	return out.String()
@@ -83,7 +83,7 @@ func (n *Node) HTML() string {
 		return ""
 	}
 	var out strings.Builder
-	for n := asHTMLNode(n).FirstChild; n != nil; n = n.NextSibling {
+	for n := AsHTMLNode(n).FirstChild; n != nil; n = n.NextSibling {
 		if err := html.Render(&out, n); err != nil {
 			panic(fmt.Sprintf("Could not render html: %s", err))
 		}

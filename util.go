@@ -11,9 +11,9 @@ import (
 type Node html.Node
 type Nodes []*Node
 
-func asHTMLNode(n *Node) *html.Node  { return (*html.Node)(unsafe.Pointer(n)) }
-func asNode(n *html.Node) *Node      { return (*Node)(unsafe.Pointer(n)) }
-func asNodes(ns *[]*html.Node) Nodes { return *(*[]*Node)(unsafe.Pointer(ns)) }
+func AsHTMLNode(n *Node) *html.Node  { return (*html.Node)(unsafe.Pointer(n)) }
+func AsNode(n *html.Node) *Node      { return (*Node)(unsafe.Pointer(n)) }
+func AsNodes(ns *[]*html.Node) Nodes { return *(*[]*Node)(unsafe.Pointer(ns)) }
 
 var duplicateWhitespace = regexp.MustCompile(`\s+(\n)\s*|\s*(\n)\s+|(\s)\s+`)
 

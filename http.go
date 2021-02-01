@@ -64,8 +64,10 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 	if err != nil {
 		return nil, err
 	}
-	if err := t.Cache.Set(req, res); err != nil {
-		log.Println("ERROR: Cache.Set ", err)
+	if res.StatusCode < 400 {
+		if err := t.Cache.Set(req, res); err != nil {
+			log.Println("ERROR: Cache.Set ", err)
+		}
 	}
 	return res, nil
 }

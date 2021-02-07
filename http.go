@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -94,6 +95,7 @@ func (c *FileCache) Get(req *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	bs = bytes.SplitN(bs, []byte("\n"), 2)[1]
 	res, err := http.ReadResponse(bufio.NewReader(bytes.NewReader(bs)), req)
 	if err != nil {
 		return nil, err
@@ -106,5 +108,10 @@ func (c *FileCache) Set(req *http.Request, res *http.Response) error {
 	if err != nil {
 		return err
 	}
+	u, err := url.PathUnescape(req.URL.String())
+	if err != nil {
+		u = req.URL.String()
+	}
+	bs = append([]byte(u+"\n"), bs...)
 	return ioutil.WriteFile(c.Key(req), bs, os.ModePerm)
 }

@@ -55,11 +55,11 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 	if t.UserAgent != "" {
 		req.Header.Set("User-Agent", t.UserAgent)
 	}
-	if t.RateLimiter != nil {
-		<-t.RateLimiter
-	}
 	res, err := t.Transport.RoundTrip(req)
 	for i := 0; i < t.RetryCount && (err != nil || res.StatusCode >= 400); i++ {
+		if t.RateLimiter != nil {
+			<-t.RateLimiter
+		}
 		res, err = t.Transport.RoundTrip(req)
 	}
 	if err != nil {

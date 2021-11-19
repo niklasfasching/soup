@@ -33,24 +33,24 @@ type Transport struct {
 
 type FileCache struct{ Root string }
 
-type NoopCache struct{}
-
 var invalidFileNameChars = regexp.MustCompile(`[^-_0-9a-zA-Z]+`)
 
 func (t Transport) Client() (*http.Client, error) {
 	if t.Transport == nil {
 		t.Transport = http.DefaultTransport
 	}
+	c := &http.Client{Transport: &t}
 	if t.Cache == nil {
-		t.Cache = &NoopCache{}
+		return c, nil
 	}
-	err := t.Cache.Init()
-	return &http.Client{Transport: &t}, err
+	return c, t.Cache.Init()
 }
 
 func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	if res, err := t.Cache.Get(req); err == nil {
-		return res, nil
+	if t.Cache != nil {
+		if res, err := t.Cache.Get(req); err == nil {
+			return res, nil
+		}
 	}
 	if t.UserAgent != "" {
 		req.Header.Set("User-Agent", t.UserAgent)
@@ -65,7 +65,7 @@ func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 	if err != nil {
 		return nil, err
 	}
-	if res.StatusCode < 400 {
+	if res.StatusCode < 400 && t.Cache != nil {
 		if err := t.Cache.Set(req, res); err != nil {
 			log.Println("ERROR: Cache.Set ", err)
 		}
@@ -83,10 +83,6 @@ func (c *FileCache) Key(req *http.Request) string {
 	}
 	return filepath.Join(c.Root, key+hex.EncodeToString(hash.Sum(nil)))
 }
-
-func (*NoopCache) Init() error                               { return nil }
-func (*NoopCache) Get(*http.Request) (*http.Response, error) { return nil, os.ErrNotExist }
-func (*NoopCache) Set(*http.Request, *http.Response) error   { return nil }
 
 func (c *FileCache) Init() error { return os.MkdirAll(c.Root, os.ModePerm) }
 

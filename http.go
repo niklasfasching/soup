@@ -46,10 +46,10 @@ func (t Transport) Client() (*http.Client, error) {
 	return c, t.Cache.Init()
 }
 
-func (t *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if t.Cache != nil {
-		if res, err := t.Cache.Get(req); err == nil {
-			return res, nil
+		if res, err := t.Cache.Get(req); res != nil || err != nil {
+			return res, err
 		}
 	}
 	if t.UserAgent != "" {

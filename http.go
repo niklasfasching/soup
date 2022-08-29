@@ -48,7 +48,7 @@ func (t Transport) Client() (*http.Client, error) {
 
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	if t.Cache != nil {
-		if res, err := t.Cache.Get(req); res != nil || err != nil {
+		if res, err := t.Cache.Get(req); res != nil || (err != nil && !os.IsNotExist(err)) {
 			return res, err
 		}
 	}

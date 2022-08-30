@@ -29,6 +29,7 @@ type Transport struct {
 	RateLimiter <-chan time.Time
 	Cache       Cache
 	UserAgent   string
+	OnReq       func(*http.Request)
 }
 
 type FileCache struct{ Root string }
@@ -51,6 +52,9 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		if res, err := t.Cache.Get(req); res != nil || (err != nil && !os.IsNotExist(err)) {
 			return res, err
 		}
+	}
+	if t.OnReq != nil {
+		t.OnReq(req)
 	}
 	if t.UserAgent != "" {
 		req.Header.Set("User-Agent", t.UserAgent)
